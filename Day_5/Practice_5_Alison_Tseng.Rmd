@@ -1,0 +1,185 @@
+---
+title: "Day 5 Practice"
+output: html_document
+---
+
+0. Get the `french_fries` data into "long" format.  Call the new value variable "rating" and the factor with all the descriptors "flavor". Re-code the labels of the `treatment` variable to be "oil1", "oil2", and "oil3".
+
+```{r}
+
+library(reshape2)
+library(ggplot2)
+
+FrenchFries <- french_fries
+
+head(FrenchFries)
+FrenchFries.melt <- melt(FrenchFries, id.vars = c("time", "treatment", "subject", "rep"), value.name = "rating", variable.name = "flavor")
+head(FrenchFries.melt)
+
+levels(FrenchFries.melt$treatment)
+levels(FrenchFries.melt$treatment) <- c("oil1", "oil2", "oil3")
+summary(FrenchFries.melt)
+
+```
+
+1. Use `ggplot` to plot a histogram and a density plot (separately) for `rating` 
+   - Try some different values for `binwidth` for the histogram.
+   - Try some different values for `adjust` for the density plot.
+
+```{r}
+
+histogram <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram()
+histogram
+
+histogram.binwidth10 <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram(binwidth = 10)
+histogram.binwidth10
+
+histogram.binwidth.1 <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram(binwidth = .1)
+histogram.binwidth.1
+
+density <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_density()
+density
+
+density.adjust10 <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_density(adjust = 10)
+density.adjust10
+
+density.adjust.1 <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_density(adjust = .1)
+density.adjust.1
+
+```
+
+
+2. How does the distribution look?  Try transforming the variable and try to get it to look more normal (i.e., more Gaussian).  If it already looks normal, do something to it to make it look non-normal.
+
+```{r}
+
+# The distribution is not normal.
+
+histogram.normal <- ggplot(FrenchFries.melt, aes(log(x = rating))) + geom_histogram()
+histogram.normal
+
+```
+
+3. Let's break this up by the `treatment` factor
+   - Plot it as a density plot, mapping `color` to the factor
+   - Same, but try using `fill` instead of `color`
+   - Same, using `linetype` instead of `color`
+   - Plot the data as a boxplot, with the factor as `x` and the numerical variable as `y`
+
+```{r}
+
+density.color <- ggplot(FrenchFries.melt, aes(x = rating, color = treatment)) + geom_density()
+density.color
+
+density.fill <- ggplot(FrenchFries.melt, aes(x = rating, fill = treatment)) + geom_density()
+density.fill
+
+density.linetype <- ggplot(FrenchFries.melt, aes(x = rating, linetype = treatment)) + geom_density()
+density.linetype
+
+boxplot <- ggplot(FrenchFries.melt, aes(x = treatment, y = rating)) + geom_boxplot()
+boxplot
+
+```
+
+4. Now let's look at breaking up a histogram across this factor.  With the same variables you used in #3:
+   - Plot a histogram, but use faceting to display them, one above the other.
+   - Try mapping the factor to `color` or `fill`, to see what that looks like.
+
+```{r}
+
+histogram.facet <- ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram() + facet_grid(treatment ~ .)
+histogram.facet
+
+histogram.color <- ggplot(FrenchFries.melt, aes(x = rating, color = treatment)) + geom_histogram()
+histogram.color
+
+histogram.fill <- ggplot(FrenchFries.melt, aes(x = rating, fill = treatment)) + geom_histogram()
+histogram.fill
+
+```
+
+5. Now cast the data back to where the different flavors are in differnet columns. Pick two of the flavor columns to explore
+   - Create a scatterplot, with one variable mapped to `x` and the other to `y`.
+   - Plot a "loess" smoother on top of the scatterplot
+   - Plot a regression line on top of the scatterplot (instead of the loess)
+   
+```{r}
+
+head(FrenchFries.melt)
+FrenchFries.cast <- dcast(FrenchFries.melt, time + treatment + subject + rep ~ flavor, value.var = "rating")
+head(FrenchFries.cast)
+
+scatter <- ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point()
+scatter
+
+scatter.loess <- scatter + geom_smooth()
+scatter.loess
+
+scatter.regression <- scatter + geom_smooth(method = "lm")
+scatter.regression
+
+```
+
+6. With this same scatterplot, break it up by `treatment`
+   - Map `treatment` to `color`
+   - Facet by `treatment`
+
+```{r}
+
+scatter.treatment <- ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point(aes(color = treatment))
+scatter.treatment
+
+scatter.facet <- ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point(aes(color = treatment)) + facet_grid(treatment ~ .)
+scatter.facet
+
+```
+
+
+7. Output all of the plots above as a single PDF.
+
+```{r}
+
+pdf("Practice_5_Alison_Tseng.pdf")
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram()
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram(binwidth = 10)
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram(binwidth = .1)
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_density()
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_density(adjust = 10)
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_density(adjust = .1)
+
+ggplot(FrenchFries.melt, aes(log(x = rating))) + geom_histogram()
+
+ggplot(FrenchFries.melt, aes(x = rating, color = treatment)) + geom_density()
+
+ggplot(FrenchFries.melt, aes(x = rating, fill = treatment)) + geom_density()
+
+ggplot(FrenchFries.melt, aes(x = rating, linetype = treatment)) + geom_density()
+
+ggplot(FrenchFries.melt, aes(x = treatment, y = rating)) + geom_boxplot()
+
+ggplot(FrenchFries.melt, aes(x = rating)) + geom_histogram() + facet_grid(treatment ~ .)
+
+ggplot(FrenchFries.melt, aes(x = rating, color = treatment)) + geom_histogram()
+
+ggplot(FrenchFries.melt, aes(x = rating, fill = treatment)) + geom_histogram()
+
+ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point()
+
+ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point() + geom_smooth()
+
+ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point() + geom_smooth(method = "lm")
+
+ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point(aes(color = treatment))
+
+ggplot(FrenchFries.cast, aes(x = potato, y = buttery)) + geom_point(aes(color = treatment)) + facet_grid(treatment ~ .)
+
+dev.off()
+
+```

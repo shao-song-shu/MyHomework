@@ -1,0 +1,132 @@
+---
+title: "Day 4 Homework"
+output: html_document
+---
+
+1. Change the column names of your data to something easier to work with.  If you like your column names, change them into something else reasonable, just for practice.
+
+```{r}
+
+AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/Day_2/Data_Alison_Tseng.csv")
+head(AlisonTsengData)
+
+OldNames <- colnames(AlisonTsengData)
+OldNames
+
+NewNames <- c("ENGLISH_WORD", "NUMBER_OF_TRANSLATIONS", "AMBIGUITY", "AMBIGUITY_SOURCE", "AGE_OF_ACQUISITION", "CONCRETENESS", "FAMILIARITY", "PART_OF_SPEECH", "IMAGEABILITY", "FREQUENCY", "NUMBER_OF_LETTERS", "NUMBER_OF_PHONEMES", "NUMBER_OF_SYLLABLES", "LOG_FREQUENCY", "logstl", "logcheck", "roundq", "roundr", "X")
+NewNames
+
+colnames(AlisonTsengData) <- NewNames
+head(AlisonTsengData)
+
+data.frame(OldNames, NewNames)
+
+```
+
+2. List ALL the issues you can see where it looks like your data is being read in a weird way.  If your data looks perfect, find some way to mess it up :-)
+
+```{r}
+
+# My data is being read correctly, so I decided to read in my data as a tab deliminated file instead.
+
+AlisonTsengData.Bad <- read.delim("/Users/Ian/Documents/R_Class/Day_2/Data_Alison_Tseng.csv")
+head(AlisonTsengData.Bad)
+
+# The values are not separated into columns.
+
+```
+
+3. Pick one or two of the most egregious or problematic of the issues in #2 and fix them.
+
+```{r}
+
+# AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/Day_2/Data_Alison_Tseng.csv")
+# head(AlisonTsengData)
+
+```
+
+4. Check for NAs, and report where you see them (try to pinpoint where they are, not just "5 NAs in column seven".
+
+```{r}
+
+summary(AlisonTsengData)
+
+# I have NAs in the following columns: "AGE_OF_ACQUISITION", "CONCRETENESS", "FAMILIARITY", "IMAGEABILITY", "FREQUENCY", "NUMBER_OF_PHONEMES", "NUMBER_OF_SYLLABLES", and "logstl".
+
+```
+
+5. Decide what you think you should do about the NAs, and say why.  If you can, try to implement this decision.
+
+```{r}
+
+# 312 English words have an "NA" in the "AGE_OF_ACQUISITION" column. Given that there are 562 English words, I would like to keep all levels that have an "NA". However, to practice, I will drop all levels that have an "NA".
+
+summary(AlisonTsengData)
+AlisonTsengData.NoNA <- AlisonTsengData[!is.na(AlisonTsengData$AGE_OF_ACQUISITION + AlisonTsengData$FREQUENCY + AlisonTsengData$NUMBER_OF_PHONEMES + AlisonTsengData$logstl), ]
+summary(AlisonTsengData.NoNA)
+
+```
+
+6. Remove any problematic rows and/or columns.  Say why you want to remove them.  If there aren't any problems, describe why you think there are no problems.
+
+```{r}
+
+# After dropping all levels that have an "NA", I do not think that there will be any problematic rows or columns.
+
+```
+
+7. Re-code at least one factor.  Provide a table that shows the correspondence between old levels and new levels.
+
+```{r}
+
+levels(AlisonTsengData.NoNA$AMBIGUITY_SOURCE)
+
+oldlevels <- levels(AlisonTsengData.NoNA$AMBIGUITY_SOURCE)
+
+levels(AlisonTsengData.NoNA$AMBIGUITY_SOURCE) <- c("B", "F", "M", "N", "U")
+levels(AlisonTsengData.NoNA$AMBIGUITY_SOURCE)
+
+newlevels <- levels(AlisonTsengData.NoNA$AMBIGUITY_SOURCE)
+
+data.frame(oldlevels, newlevels)
+
+```
+
+8. Run TWO DIFFERENT simple analyses or statistical tests, such as linear regression (`lm()`), logistic regression (`glm()`), correlation test (`cor.test()`), t-test (`t.test()`), or non-parametric tests (e.g., `wilcox.test()`).  For each of these:
+  - Describe why you are doing this analysis, i.e., what question is it answering?
+  - I won't judge you on statistical expertise!  (though I will make comments if I think I can be helpful)
+  - Report some key statistics from the analysis, using inline code
+
+```{r}
+
+# The following two analyses will examine whether the role of word-level characteristics in translation ambiguity between English and Mandarin is similar to the role of word-level characteristics in translation ambiguity between language pairs from the same language family (e.g., English and Dutch). 
+
+head(AlisonTsengData.NoNA)
+
+Correlation.Concreteness <- cor.test( ~ NUMBER_OF_TRANSLATIONS + CONCRETENESS, data = AlisonTsengData.NoNA)
+Correlation.Concreteness
+
+Correlation.Frequency <- cor.test( ~ NUMBER_OF_TRANSLATIONS + FREQUENCY, data = AlisonTsengData.NoNA)
+Correlation.Frequency
+
+names(Correlation.Concreteness)
+Statistic.Concreteness <- Correlation.Concreteness["statistic"]
+Statistic.Concreteness
+Parameter.Concreteness <- Correlation.Concreteness["parameter"]
+Parameter.Concreteness
+P.Concreteness <- Correlation.Concreteness["p.value"]
+P.Concreteness
+
+names(Correlation.Frequency)
+Statistic.Frequency <- Correlation.Frequency["statistic"]
+Statistic.Frequency
+Parameter.Frequency <- Correlation.Frequency["parameter"]
+Parameter.Frequency
+P.Frequency <- Correlation.Frequency["p.value"]
+P.Frequency
+
+```
+
+The correlation between number of translations and concreteness was statistically significant, r = `r Statistic.Concreteness`, with `r Parameter.Concreteness` degrees of freedom, p = `r P.Concreteness`.
+
+The correlation between number of translations and frequency was not statistically significant, r = `r Statistic.Frequency`, with `r Parameter.Frequency` degrees of freedom, p = `r P.Frequency`.

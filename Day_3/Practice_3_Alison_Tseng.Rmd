@@ -1,0 +1,102 @@
+---
+title: "Day 3 Practice"
+output: html_document
+---
+
+**NOTE:**  this was postponed to Day 4
+
+1. Make a copy of the `iris` data set in your workspace (i.e., assign the value of `iris` to a new name).
+
+```{r}
+
+library(reshape2)
+
+myiris <- iris
+myiris
+
+```
+
+2. Reshape the data frame into "long" format.  
+  - Can you still tell which measurements came from which plants?  If not, can you do something about that?
+  - Are there better names for the `variable` and `value` columns?  Change them!
+
+```{r}
+
+myiris$Plant_ID <- paste("Plant", 1:nrow(myiris), sep = "")
+myiris
+
+myiris.melt <- melt(myiris, id.vars = c("Species", "Plant_ID"), variable.name = "Measurement_Type", value.name = "Measurement")
+myiris.melt
+
+```
+
+If the order of the measurements did not change from wide format to short format, then yes, you could still tell which measurements correspond to which plant. The first setosa plant in the wide format would correspond to the first setosa plant for each variable level in the long format. However, adding a column for plant label and labeling the plants would be better.
+
+
+3. Create new columns that represent the part of the plant being measured (sepal, petal) and the dimension being measured (length, width).
+  - Check to make sure it worked!
+  
+```{r}
+
+myiris.melt$Part_Measured <- myiris.melt$Measurement_Type
+myiris.melt
+levels(myiris.melt$Part_Measured)
+levels(myiris.melt$Part_Measured) <- c("Sepal", "Sepal", "Petal", "Petal")
+myiris.melt
+
+myiris.melt$Dimension_Measured <- myiris.melt$Measurement_Type
+myiris.melt
+levels(myiris.melt$Dimension_Measured)
+levels(myiris.melt$Dimension_Measured) <- c("Length", "Width", "Length", "Width")
+myiris.melt
+
+```
+
+4. Create a data frame that leaves out the Sepal measurements
+
+```{r}
+
+NoSepal <- subset(myiris.melt, !Part_Measured == "Sepal")
+myiris.melt.nosepal <- droplevels(NoSepal)
+summary(myiris.melt.nosepal)
+
+```
+5. Using the full data set, transform the measurement variable in some way
+  - Create a new column to do it
+
+```{r}
+
+myiris.melt
+myiris.melt$Decimeters <- myiris.melt$Measurement * 10
+myiris.melt
+
+```
+  
+6. Reshape the data so that there are two measurement columns, one for all Lengths and one for all Widths.
+
+```{r}
+
+myiris.cast <- dcast(myiris.melt, Species + Plant_ID + Measurement_Type + Part_Measured + Decimeters ~ Dimension_Measured, value.var = "Measurement")
+myiris.cast
+
+```
+7. Using `dcast`, make a new data frame that aggregates over the flower parts (use mean or sum), but keeps the individual plants separate.
+
+```{r}
+
+myiris.melt
+myiris.Part <- dcast(myiris.melt, Species + Plant_ID ~ Part_Measured, value.var = "Measurement", fun.aggregate = mean)
+myiris.Part
+
+```
+
+8. Using `dcast`, make a new data frame that aggregates over flower parts and individual plants, getting "cell means" for species and dimension.
+
+```{r}
+
+myiris.melt
+myiris.Plants <- dcast(myiris.melt, Species ~ Part_Measured, value.var = "Measurement", fun.aggregate = mean)
+myiris.Plants
+
+```
+

@@ -1,0 +1,105 @@
+---
+title: "Day 3 Homework"
+output: html_document
+---
+
+The goal of this homework is to get practice with manipulating data.
+
+1. Make both a "wide" and a "long" version of your data
+
+```{r}
+
+library(reshape2)
+
+AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/Day_2/Data.csv")
+
+head(AlisonTsengData)
+
+AlisonTsengData$Unique <- c(1:1307) 
+AlisonTsengData
+
+head(AlisonTsengData)
+AlisonTsengData.Wide <- dcast(AlisonTsengData, ENGLISH_WORD + Unique ~ AMBIGUITY + AMBIGUITY_SOURCE, value.var = "NUMBER_OF_TRANSLATIONS")
+AlisonTsengData.Wide
+
+head(AlisonTsengData.Wide)
+AlisonTsengData.Long <- melt(AlisonTsengData.Wide, id.vars = c("ENGLISH_WORD", "Unique"))
+AlisonTsengData.Long
+
+```
+
+2. Transform a variable
+
+```{r}
+
+head(AlisonTsengData)
+AlisonTsengData$Transformation <- AlisonTsengData$NUMBER_OF_TRANSLATIONS * 10
+head(AlisonTsengData)
+
+```
+3. Recode a factor
+
+```{r}
+
+levels(AlisonTsengData$AMBIGUITY_SOURCE)
+levels(AlisonTsengData$AMBIGUITY_SOURCE) <- c("Unambiguous", "Form", "FM", "Meaning")
+summary(AlisonTsengData)
+
+```
+
+4. Add a new factor, where the levels are conditional on the values of some other variable. E.g., a factor of "high", "medium", and "low" based on thresholds for another variable.
+
+```{r}
+
+summary(AlisonTsengData)
+start <- AlisonTsengData[AlisonTsengData$NUMBER < 281, ]
+nrow(start)
+start$Order <- "Start"
+levels(start$Order) <- "Start"
+head(start)
+
+end <- AlisonTsengData[AlisonTsengData$NUMBER >= 281, ]
+nrow(end)
+end$Order <- "End"
+levels(end$Order) <- "End"
+head(end)
+
+AlisonTsengData.NewFactor <- rbind(start, end)
+summary(AlisonTsengData.NewFactor)
+
+```
+
+5. Reorder the levels of this new factor
+
+```{r}
+
+levels(AlisonTsengData.NewFactor$Order)
+AlisonTsengData.NewFactor$Order <- relevel(AlisonTsengData.NewFactor$Order, "End")
+levels(AlisonTsengData.NewFactor$Order)
+
+```
+
+6. Choose a factor that could be re-coded as multiple dimensions (recall the sepal/petal vs. length/width breakdown). If you don't have one, try to create one.  Now create two (or more) new factors that represent these dimensions.
+
+```{r}
+
+head(AlisonTsengData.NewFactor)
+levels(AlisonTsengData.NewFactor$AMBIGUITY_SOURCE)
+levels(AlisonTsengData.NewFactor$AMBIGUITY_SOURCE) <- c("Unambiguous", "Ambiguous", "Ambiguous", "Ambiguous")
+levels(AlisonTsengData.NewFactor$AMBIGUITY_SOURCE)
+head(AlisonTsengData.NewFactor)
+AlisonTsengData.NewFactor2 <- dcast(AlisonTsengData.NewFactor, ENGLISH_WORD + Order + Unique ~ AMBIGUITY_SOURCE, value.var = "NUMBER_OF_TRANSLATIONS")
+head(AlisonTsengData.NewFactor2)
+
+```
+
+7. Using `dcast`, aggregate some variable into "cell means" of some kind.
+
+```{r}
+
+AlisonTsengData.Aggregate <- dcast(AlisonTsengData.NewFactor, Order ~ ., value.var = "NUMBER_OF_TRANSLATIONS", fun.aggregate = mean, na.rm = TRUE)
+AlisonTsengData.Aggregate
+
+```
+
+8.  Save all of the above in a well-documented R Markdown document.  Email me the .Rmd file (and if you use different or updated data from Day 2 Homework, send that to me, too).
