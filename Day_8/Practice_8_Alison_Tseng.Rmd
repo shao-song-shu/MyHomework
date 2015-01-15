@@ -1,0 +1,76 @@
+---
+title: "Day 8 Practice"
+output: html_document
+---
+
+1. Start with this data:
+
+```{r}
+
+library(dplyr)
+library(reshape2)
+
+minpair <- read.csv("/Users/Ian/Documents/R_Class/r_programming_bsos/scottdata/CognitionPaperFinalData.csv")
+
+```
+
+2. Get the means of `WithinMinPairs` for each level of `Corpus`
+
+```{r}
+
+minpair %>%
+  group_by(Corpus) %>%
+  summarize(mean.WithinMinPairs = mean(WithinMinPairs))
+
+```
+
+3. Get cell means of `WithinMinPairs` by `Corpus` and `Merged`
+
+```{r}
+
+minpair %>%
+  group_by(Corpus, Merged) %>%
+  summarize(mean.WithinMinPairs = mean(WithinMinPairs))
+
+```
+
+4. Melt down the last four columns, which are all frequency measures.  Get the min, max, and mean log values for all of these measures, by Corpus and Merged.
+  - HINT: melt down the frequency columns first
+
+```{r}
+
+head(minpair)
+
+minpair.melt <- melt(minpair, measure.vars = c("HiSegTok", "LoSegTok", "HiSegType", "LoSegType"), variable.name = "MeasureName", value.name = "Measure")
+
+head(minpair.melt)
+
+minpair.melt %>%
+  group_by(MeasureName, Corpus, Merged) %>%
+  summarize(min.Measure = min(Measure), max.Measure = max(Measure), logmean.Measure = log(mean(Measure)))
+
+```
+
+5. Do the same as 4, but only where HiSegTok is greater than the median value for each Corpus.
+
+```{r}
+
+step1 <- minpair %>%
+  group_by(Corpus) %>%
+  summarize(median.HiSegTok = median(HiSegTok))
+step1
+
+minpair.merged <- merge(step1, minpair)
+head(minpair.merged)
+
+minpair.filtered <- filter(minpair.merged, HiSegTok > median.HiSegTok)
+head(minpair.filtered)
+
+minpair.melt <- melt(minpair.filtered, measure.vars = c("HiSegTok", "LoSegTok", "HiSegType", "LoSegType"), variable.name = "MeasureName", value.name = "Measure")
+head(minpair.melt)
+
+minpair.melt %>%
+  group_by(MeasureName, Corpus, Merged) %>%
+  summarize(min.Measure = min(Measure), max.Measure = max(Measure), logmean.Measure = log(mean(Measure)))
+
+```

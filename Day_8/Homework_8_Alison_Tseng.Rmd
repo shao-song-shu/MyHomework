@@ -1,0 +1,89 @@
+---
+title: "Day 8 Homework"
+output: html_document
+---
+
+1. Try to recreate the results of Homework 6 (or your intended results) using the `dplyr` functions.
+
+```{r}
+
+library(dplyr)
+
+AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/MyHomework/Day_2/Data_Alison_Tseng.csv")
+head(AlisonTsengData)
+
+AlisonTsengData %>%
+  filter(!is.na(AlisonTsengData$AOA + AlisonTsengData$KFFRQ + AlisonTsengData$NPHN + AlisonTsengData$logstl)) %>%
+  group_by(AMBIGUITY_SOURCE) %>%
+  summarize(mean.CNC = mean(CNC))
+
+```
+
+2. Find another kind of analysis/transformation/summary stat that you want to apply across multiple groups in your data. Use the functions from `reshape2` and `dplyr` to get these results.
+
+```{r}
+
+library(dplyr)
+library(reshape2)
+
+AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/MyHomework/Day_2/Data_Alison_Tseng.csv")
+head(AlisonTsengData)
+
+AlisonTsengData.subset <- select(AlisonTsengData, ENGLISH_WORD:FAM, IMG:NSYL)
+summary(AlisonTsengData.subset)
+
+AlisonTsengData.melt <- melt(AlisonTsengData.subset, id.vars = c("ENGLISH_WORD", "NUMBER_OF_TRANSLATIONS", "AMBIGUITY", "AMBIGUITY_SOURCE"), variable.name = "CHARACTERISTICS", value.name = "MEASUREMENT")
+head(AlisonTsengData.melt)
+
+AlisonTsengData.melt %>%
+  filter(!is.na(AlisonTsengData.melt$MEASUREMENT)) %>%
+  group_by(CHARACTERISTICS, AMBIGUITY_SOURCE) %>%
+  summarize(mean = mean(as.numeric(MEASUREMENT)))
+
+```
+
+3. For more practice, try another example of something like #2 (find another stat or grouping or something).
+
+```{r}
+
+library(dplyr)
+library(reshape2)
+
+AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/MyHomework/Day_2/Data_Alison_Tseng.csv")
+head(AlisonTsengData)
+
+AlisonTsengData.subset <- select(AlisonTsengData, ENGLISH_WORD:FAM, IMG:NSYL)
+summary(AlisonTsengData.subset)
+
+AlisonTsengData.melt <- melt(AlisonTsengData.subset, id.vars = c("ENGLISH_WORD", "NUMBER_OF_TRANSLATIONS", "AMBIGUITY", "AMBIGUITY_SOURCE"), variable.name = "CHARACTERISTICS", value.name = "MEASUREMENT")
+head(AlisonTsengData.melt)
+
+AlisonTsengData.melt %>%
+  filter(!is.na(AlisonTsengData.melt$MEASUREMENT)) %>%
+  group_by(CHARACTERISTICS, AMBIGUITY) %>%
+  summarize(mean = mean(as.numeric(MEASUREMENT)))
+
+```
+
+4. Do yet another case of #2 above, but this time throw in a transformation, too.
+
+```{r}
+
+library(dplyr)
+library(reshape2)
+
+AlisonTsengData <- read.csv("/Users/Ian/Documents/R_Class/MyHomework/Day_2/Data_Alison_Tseng.csv")
+head(AlisonTsengData)
+
+AlisonTsengData.subset <- select(AlisonTsengData, ENGLISH_WORD:FAM, IMG:NSYL)
+summary(AlisonTsengData.subset)
+
+AlisonTsengData.melt <- melt(AlisonTsengData.subset, id.vars = c("ENGLISH_WORD", "NUMBER_OF_TRANSLATIONS", "AMBIGUITY", "AMBIGUITY_SOURCE"), variable.name = "CHARACTERISTICS", value.name = "MEASUREMENT")
+head(AlisonTsengData.melt)
+
+AlisonTsengData.melt %>%
+  filter(!is.na(AlisonTsengData.melt$MEASUREMENT)) %>%
+  group_by(CHARACTERISTICS, NUMBER_OF_TRANSLATIONS) %>%
+  summarize(mean = mean(as.numeric(MEASUREMENT)))
+
+```
