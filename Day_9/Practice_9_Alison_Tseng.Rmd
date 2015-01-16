@@ -1,0 +1,107 @@
+---
+title: "Day 9 Practice"
+output: html_document
+---
+
+1. Use the following data:
+
+```{r}
+
+myiris <- iris
+set.seed(42)
+for(col in 1:4) {
+  myiris[sample(nrow(myiris), 20, replace = FALSE), col] <- NA
+}
+
+```
+
+2. Write a function that will:
+  - take a vector of numbers as input
+  - return the log of the largest non-NA value
+  - Try this out on a vector that you make up
+
+```{r}
+
+Maximum.Value <- function(x) {
+  library(dplyr)
+  y <- log(x)
+  y.NoNA <- y[!is.na(y)]
+  Output <- max(y.NoNA)
+  Output  
+}
+
+x.Result <- Maximum.Value(1:10)
+x.Result
+
+```
+
+3. Run this function over rows of the data from #1
+
+```{r}
+
+library(dplyr)
+measurement <- log(myiris$Sepal.Length)
+measurement.NoNA <- measurement[!is.na(measurement)]
+Output <- max(measurement.NoNA)
+Output
+
+
+
+
+
+Maximum.Value <- function(x) {
+  library(dplyr)
+  y <- log(x)
+  y.NoNA <- y[!is.na(y)]
+  Output <- max(y.NoNA)
+  Output  
+}
+
+Sepal.Length.Result <- Maximum.Value(myiris$Sepal.Length)
+Sepal.Length.Result
+
+Sepal.Width.Result <- Maximum.Value(myiris$Sepal.Width)
+Sepal.Width.Result
+
+Petal.Length.Result <- Maximum.Value(myiris$Petal.Length)
+Petal.Length.Result
+
+Petal.Width.Result <- Maximum.Value(myiris$Petal.Width)
+Petal.Width.Result
+
+All.Results <- cbind(Sepal.Length.Result, Sepal.Width.Result, Petal.Length.Result, Petal.Width.Result)
+All.Results
+
+```
+
+4. Write a function that will get the standard error of a vector of numbers. Use that function to get a standard error for each measure for each Species in the data from #1 (ignoring NAs)
+
+```{r}
+
+Standard.Error <- function(x, ignore.na = TRUE) { 
+  if(!ignore.na) {
+    Output <- sd(x)/sqrt(length(x)) 
+  } else {
+    Numerator <- sd(x, na.rm = TRUE)
+    Denominator <- sqrt(length(which(!is.na(x))))
+    Output <- Numerator/Denominator
+  }
+  Output
+}
+
+Sepal.Length.Result <- Standard.Error(myiris$Sepal.Length)
+Sepal.Length.Result
+
+Sepal.Width.Result <- Standard.Error(myiris$Sepal.Width)
+Sepal.Width.Result
+
+Petal.Length.Result <- Standard.Error(myiris$Petal.Length)
+Petal.Length.Result
+
+Petal.Width.Result <- Standard.Error(myiris$Petal.Width)
+Petal.Width.Result
+
+All.Results <- cbind(Sepal.Length.Result, Sepal.Width.Result, Petal.Length.Result, Petal.Width.Result)
+All.Results
+
+```
